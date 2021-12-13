@@ -26,6 +26,7 @@ commentSymbol = "//"
 
 import sys
 import os, os.path
+import csv
 
 acceptableFileExtensions = sys.argv[1:]
 if not acceptableFileExtensions:
@@ -54,30 +55,41 @@ totalCommentLineCount = 0
 print("")
 print("lines\tblank lines\tcomment lines\tcode lines\t\tFilename")
 
-for fileToCheck in filesToCheck:
-   with open(fileToCheck, errors='ignore') as f:
+with open("lines_of_code.csv", 'w', newline='') as csvfile:
+   csvwriter = csv.writer(csvfile)
+   csvwriter.writerow(
+       ["filename", "lines", "blank lines", "comment lines", "code lines"])
 
-      fileLineCount = 0
-      fileBlankLineCount = 0
-      fileCommentLineCount = 0
+   for fileToCheck in filesToCheck:
+      with open(fileToCheck, errors='ignore') as f:
 
-      for line in f:
-         lineCount += 1
-         fileLineCount += 1
+         fileLineCount = 0
+         fileBlankLineCount = 0
+         fileCommentLineCount = 0
 
-         lineWithoutWhitespace = line.strip()
-         if not lineWithoutWhitespace:
-            totalBlankLineCount += 1
-            fileBlankLineCount += 1
-         elif lineWithoutWhitespace.startswith(commentSymbol):
-            totalCommentLineCount += 1
-            fileCommentLineCount += 1
+         for line in f:
+            lineCount += 1
+            fileLineCount += 1
 
-      print(
-          format(fileLineCount) + "\t" + format(fileBlankLineCount) + "\t\t" +
-          format(fileCommentLineCount) + "\t\t" +
-          format(fileLineCount - fileBlankLineCount - fileCommentLineCount) +
-          "\t\t" + format(os.path.basename(fileToCheck)))
+            lineWithoutWhitespace = line.strip()
+            if not lineWithoutWhitespace:
+               totalBlankLineCount += 1
+               fileBlankLineCount += 1
+            elif lineWithoutWhitespace.startswith(commentSymbol):
+               totalCommentLineCount += 1
+               fileCommentLineCount += 1
+
+         csvwriter.writerow([
+             os.path.basename(fileToCheck), fileLineCount, fileBlankLineCount,
+             fileCommentLineCount,
+             format(fileLineCount - fileBlankLineCount - fileCommentLineCount)
+         ])
+         print(
+             format(fileLineCount) + "\t" + format(fileBlankLineCount) +
+             "\t\t" + format(fileCommentLineCount) + "\t\t" +
+             format(fileLineCount - fileBlankLineCount -
+                    fileCommentLineCount) + "\t\t" +
+             format(os.path.basename(fileToCheck)))
 
 print("")
 print("Totals")
